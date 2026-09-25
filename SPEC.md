@@ -76,8 +76,10 @@ output      := 'OUTPUT' identList
   groups, variable map panel. *Done.*
 - **M3** — Algebraic solver. `samples/lec6-cstr.eqs` runs. Output tab, console,
   residuals. *Done.*
-- **M4** — DAE integrator, `INTEGRAL` and `trend`.
-  `samples/fixed-bed-isothermal.eqs` runs. Trend and Chart tabs, CSV export.
+- **M4** — DAE integrator, `INTEGRAL` and `trend`. Trend and Chart tabs, CSV
+  export. *Done.* The packed-bed sample turns out to have no bounded solution
+  with the rate constants as written, so the integrator reports where and why;
+  `samples/pfr-first-order.eqs` carries the analytic check.
 
 Carried through every milestone: localStorage file bar, sample templates,
 Ctrl+Enter to run, light and dark themes, TH/EN toggle, TIS-620 support, tests.

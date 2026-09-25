@@ -5,6 +5,7 @@ import { validate } from "../src/lang";
 import { solveModel } from "../src/solver/solve";
 import { ProblemsPanel } from "../src/ui/ProblemsPanel";
 import { ResultsPanel } from "../src/ui/ResultsPanel";
+import { TrendChart } from "../src/ui/TrendChart";
 import { VariablesPanel } from "../src/ui/VariablesPanel";
 
 const read = (name: string) =>
@@ -80,13 +81,23 @@ describe("results panel", () => {
     expect(html).toContain("XA");
   });
 
-  it("explains an ODE model it cannot run yet, in Thai", () => {
+  it("shows the trend table for an integrated model", () => {
+    const pfr = validate(read("pfr-first-order.eqs"));
+    const integrated = solveModel(pfr.program, pfr.symbols, pfr.structure!);
+    const html = renderToStaticMarkup(
+      <ResultsPanel result={integrated} locale="en" />,
+    );
+    expect(integrated.converged).toBe(true);
+    expect(html).toContain("XA");
+  });
+
+  it("explains a runaway solution in Thai rather than naming a method", () => {
     const bed = validate(read("fixed-bed-isothermal.eqs"));
     const attempt = solveModel(bed.program, bed.symbols, bed.structure!);
     const html = renderToStaticMarkup(
       <ResultsPanel result={attempt} locale="th" />,
     );
-    expect(html).toContain("INTEGRAL");
+    expect(html).toContain("ค่าพุ่งไม่มีขอบเขต");
   });
 
   it("says nothing has been run before the first run", () => {
@@ -94,5 +105,28 @@ describe("results panel", () => {
       <ResultsPanel result={undefined} locale="en" />,
     );
     expect(html).toContain("results--empty");
+  });
+});
+
+describe("trend chart", () => {
+  const pfr = validate(read("pfr-first-order.eqs"));
+  const solved = solveModel(pfr.program, pfr.symbols, pfr.structure!);
+
+  it("draws one panel per trended variable", () => {
+    const html = renderToStaticMarkup(
+      <TrendChart table={solved.trend!} locale="en" />,
+    );
+    const panels = html.match(/chart__panel/g) ?? [];
+    expect(panels).toHaveLength(solved.trend!.columns.length - 1);
+  });
+
+  it("names every panel and its axis, so colour carries nothing alone", () => {
+    const html = renderToStaticMarkup(
+      <TrendChart table={solved.trend!} locale="en" />,
+    );
+    for (const column of solved.trend!.columns.slice(1)) {
+      expect(html).toContain(`>${column}<`);
+    }
+    expect(html).toContain("Along V");
   });
 });

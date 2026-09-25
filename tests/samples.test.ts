@@ -26,4 +26,9 @@ describe("real models", () => {
     const messages = report(read("fixed-bed-isothermal.eqs"));
     expect(messages.filter((m) => m.startsWith("error"))).toEqual([]);
   });
+
+  it("accepts the PFR model with no errors", () => {
+    const messages = report(read("pfr-first-order.eqs"));
+    expect(messages.filter((m) => m.startsWith("error"))).toEqual([]);
+  });
 });

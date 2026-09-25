@@ -666,3 +666,129 @@ button:hover {
 .results__value {
   text-align: end;
 }
+
+/* ------------------------------------------------------------------- chart */
+
+/* Series colour comes from a validated categorical palette; with small
+   multiples every panel carries one series named in its own caption, so one
+   hue is used throughout and identity never rests on colour. */
+:root {
+  --chart-line: #2a78d6;
+  --chart-axis: #cbd0d8;
+  --chart-cursor: #52514e;
+}
+
+:root[data-theme="dark"] {
+  --chart-line: #3987e5;
+  --chart-axis: #3a3f48;
+  --chart-cursor: #c3c2b7;
+}
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chart--empty {
+  color: var(--text-dim);
+  padding: 16px;
+}
+
+.chart__axisNote,
+.chart__cursorNote {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.chart__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.chart__panel {
+  margin: 0;
+  padding: 6px 8px 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-sunken);
+}
+
+.chart__caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.chart__name {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-weight: 600;
+}
+
+.chart__reading {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  color: var(--text-dim);
+}
+
+.chart__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chart__line {
+  fill: none;
+  stroke: var(--chart-line);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart__baseline {
+  stroke: var(--chart-axis);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart__cursor line {
+  stroke: var(--chart-cursor);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart__cursor circle {
+  fill: var(--chart-line);
+  stroke: var(--bg-sunken);
+  stroke-width: 2;
+}
+
+.chart__range {
+  fill: var(--text-dim);
+  font-size: 9px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
+.chart__range--end {
+  text-anchor: end;
+}
+
+.results__scroller {
+  overflow: auto;
+  max-height: 100%;
+}
+
+.results__table--wide {
+  max-width: none;
+}
+
+.results__table--wide th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-raised);
+}

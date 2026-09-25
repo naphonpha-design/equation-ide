@@ -87,14 +87,16 @@ describe("solving models", () => {
     expect(loop.variables.sort()).toEqual(["x", "y"]);
   });
 
-  it("refuses a model with derivatives, which M4 will handle", () => {
+  it("integrates a model with derivatives", () => {
     const source = [
       "FA'=-FA",
       "FA#1",
       "INTEGRAL W[0,1] step 0.1 by RKV",
       "OUTPUT FA",
     ].join("\n");
-    expect(run(source).failure).toEqual({ kind: "unsupported-ode" });
+    const result = run(source);
+    expect(result.converged).toBe(true);
+    expect(value(result, "FA")).toBeCloseTo(Math.exp(-1), 9);
   });
 
   it("reports the variables it could not solve rather than silently failing", () => {

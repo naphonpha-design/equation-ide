@@ -50,8 +50,16 @@ export interface UiStrings {
   residualHint: string;
   blocksSolved: (total: number, iterated: number) => string;
   outputTable: string;
+  trendTable: string;
+  trendChart: string;
   rawConsole: string;
   columnValue: string;
+  exportCsv: string;
+  trendTooShort: string;
+  hoverForValues: string;
+  alongAxis: (name: string, from: string, to: string) => string;
+  profileOf: (name: string, independent: string) => string;
+  integrationSummary: (steps: number, method: string) => string;
 }
 
 const TH: UiStrings = {
@@ -107,23 +115,35 @@ const TH: UiStrings = {
   solveFailedTitle: "คำนวณไม่สำเร็จ",
   solveFailure: (failure) => {
     switch (failure.kind) {
-      case "unsupported-ode":
-        return "โมเดลนี้มีสมการอนุพันธ์ (INTEGRAL) ซึ่งจะรองรับใน M4 — ตอนนี้รันได้เฉพาะระบบพีชคณิต";
       case "unbalanced":
         return "จำนวนสมการกับตัวแปรไม่เท่ากัน ดูรายละเอียดที่แท็บปัญหา";
       case "block-failed":
         return `ลู่เข้าไม่ได้ที่ ${failure.variables.join(", ")} — ลองเปลี่ยนค่าเดา (#) ให้ใกล้คำตอบจริงขึ้น`;
       case "evaluation":
         return `คำนวณนิพจน์ไม่ได้${failure.variable ? ` ที่ '${failure.variable}'` : ""}: ${failure.message}`;
+      case "integration":
+        return (
+          `อินทิเกรตไปต่อไม่ได้ที่ตำแหน่ง ${failure.at.toPrecision(6)} — ค่าพุ่งไม่มีขอบเขต` +
+          (failure.detail ? ` (${failure.detail})` : "") +
+          ". ตรวจค่าคงที่อัตราและรูปสมการอัตรา ว่าหน่วยกับขนาดสมเหตุสมผลไหม"
+        );
     }
   },
   residual: (value) => `เศษเหลือสูงสุด ${value.toExponential(2)}`,
   residualHint: "ค่ายิ่งใกล้ศูนย์ แปลว่าคำตอบยิ่งเข้ากับทุกสมการ",
   blocksSolved: (total, iterated) =>
     `${total} บล็อก (วนซ้ำ ${iterated})`,
-  outputTable: "ตาราง",
+  outputTable: "ค่าสุดท้าย",
+  trendTable: "ตารางตามช่วง",
+  trendChart: "กราฟ",
   rawConsole: "ข้อความดิบ",
   columnValue: "ค่า",
+  exportCsv: "บันทึก CSV",
+  trendTooShort: "ข้อมูลน้อยเกินกว่าจะวาดกราฟ",
+  hoverForValues: "เลื่อนเมาส์บนกราฟเพื่อดูค่าที่ตำแหน่งนั้น",
+  alongAxis: (name, from, to) => `ตามแกน ${name} ตั้งแต่ ${from} ถึง ${to}`,
+  profileOf: (name, independent) => `กราฟของ ${name} ตามแกน ${independent}`,
+  integrationSummary: (steps, method) => `อินทิเกรต ${steps} ก้าว (${method})`,
 };
 
 const EN: UiStrings = {
@@ -179,22 +199,34 @@ const EN: UiStrings = {
   solveFailedTitle: "Could not solve",
   solveFailure: (failure) => {
     switch (failure.kind) {
-      case "unsupported-ode":
-        return "This model has derivative equations (INTEGRAL), which arrive in M4. Algebraic systems run today.";
       case "unbalanced":
         return "There are not as many equations as unknowns; see the Problems tab";
       case "block-failed":
         return `Did not converge on ${failure.variables.join(", ")} — try a starting guess (#) closer to the answer`;
       case "evaluation":
         return `Could not evaluate an expression${failure.variable ? ` at '${failure.variable}'` : ""}: ${failure.message}`;
+      case "integration":
+        return (
+          `Integration could not get past ${failure.at.toPrecision(6)} — the solution runs away` +
+          (failure.detail ? ` (${failure.detail})` : "") +
+          ". Check the rate constants and the form of the rate laws."
+        );
     }
   },
   residual: (value) => `Largest residual ${value.toExponential(2)}`,
   residualHint: "The closer to zero, the better the answer satisfies every equation",
   blocksSolved: (total, iterated) => `${total} blocks (${iterated} iterated)`,
-  outputTable: "Table",
+  outputTable: "Final values",
+  trendTable: "Trend table",
+  trendChart: "Chart",
   rawConsole: "Raw text",
   columnValue: "Value",
+  exportCsv: "Save CSV",
+  trendTooShort: "Too few points to draw a profile",
+  hoverForValues: "Hover a panel to read the values at that position",
+  alongAxis: (name, from, to) => `Along ${name}, ${from} to ${to}`,
+  profileOf: (name, independent) => `Profile of ${name} along ${independent}`,
+  integrationSummary: (steps, method) => `${steps} integration steps (${method})`,
 };
 
 export const UI: Record<Locale, UiStrings> = { th: TH, en: EN };

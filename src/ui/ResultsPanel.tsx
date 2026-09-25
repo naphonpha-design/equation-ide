@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { SolveResult } from "../solver/solve";
 import type { Locale } from "../i18n/messages";
 import { UI } from "../i18n/ui";
+import { TrendChart } from "./TrendChart";
 
 interface ResultsPanelProps {
   result: SolveResult | undefined;
@@ -20,7 +21,9 @@ function format(value: number): string {
 
 export function ResultsPanel({ result, locale }: ResultsPanelProps) {
   const strings = UI[locale];
-  const [view, setView] = useState<"table" | "console">("table");
+  const [view, setView] = useState<
+    "table" | "trend" | "chart" | "console"
+  >("table");
 
   if (!result) {
     return <div className="results results--empty">{strings.notRunYet}</div>;
@@ -41,6 +44,24 @@ export function ResultsPanel({ result, locale }: ResultsPanelProps) {
   }
 
   const iterated = result.blocks.filter((block) => !block.direct);
+  const trend = result.trend;
+
+  const downloadCsv = (): void => {
+    if (!trend) return;
+    const lines = [
+      trend.columns.join(","),
+      ...trend.rows.map((row) => row.map((value) => String(value)).join(",")),
+    ];
+    const blob = new Blob([lines.join("\n")], {
+      type: "text/csv;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "trend.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="results">
@@ -52,6 +73,19 @@ export function ResultsPanel({ result, locale }: ResultsPanelProps) {
         <span className="chip">
           {strings.blocksSolved(result.blocks.length, iterated.length)}
         </span>
+        {result.integration ? (
+          <span className="chip">
+            {strings.integrationSummary(
+              result.integration.steps,
+              result.integration.method,
+            )}
+          </span>
+        ) : null}
+        {trend ? (
+          <button type="button" onClick={downloadCsv}>
+            {strings.exportCsv}
+          </button>
+        ) : null}
         <div className="segmented results__views">
           <button
             type="button"
@@ -60,6 +94,24 @@ export function ResultsPanel({ result, locale }: ResultsPanelProps) {
           >
             {strings.outputTable}
           </button>
+          {trend ? (
+            <>
+              <button
+                type="button"
+                className={view === "trend" ? "is-active" : ""}
+                onClick={() => setView("trend")}
+              >
+                {strings.trendTable}
+              </button>
+              <button
+                type="button"
+                className={view === "chart" ? "is-active" : ""}
+                onClick={() => setView("chart")}
+              >
+                {strings.trendChart}
+              </button>
+            </>
+          ) : null}
           <button
             type="button"
             className={view === "console" ? "is-active" : ""}
@@ -70,7 +122,32 @@ export function ResultsPanel({ result, locale }: ResultsPanelProps) {
         </div>
       </div>
 
-      {view === "table" ? (
+      {view === "chart" && trend ? (
+        <TrendChart table={trend} locale={locale} />
+      ) : view === "trend" && trend ? (
+        <div className="results__scroller">
+          <table className="results__table results__table--wide">
+            <thead>
+              <tr>
+                {trend.columns.map((column) => (
+                  <th key={column}>{column}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {trend.rows.map((row, index) => (
+                <tr key={index}>
+                  {row.map((value, column) => (
+                    <td key={column} className="results__value">
+                      {format(value)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : view === "table" ? (
         <table className="results__table">
           <thead>
             <tr>
