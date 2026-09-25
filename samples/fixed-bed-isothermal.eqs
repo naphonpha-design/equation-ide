@@ -1,0 +1,71 @@
+// Fixed-bed isothermal (correct)
+// Reaction:  A + 2B <--> C + 3D
+//            2A + C  --> E + F
+//   Packed bed: W is the independent variable, P is a state
+
+//1. Design Equation    (six balances over W)
+FA'=-rs1-2*rs2;        FA#FA0
+FB'=-2*rs1;            FB#FB0
+FC'=-rs1+rs2;        FC#FC0
+FD'=-3*rs1;            FD#FD0
+FE'=rs2;                FE#FE0
+FF'=rs2;                FF#FF0
+
+//2. Feed, Bed and Catalyst
+FA0=3; FB0=10; FC0=0; FD0=0; FE0=0; FF0=0; FI0=0 //mol/s
+FT0=FA0+FB0+FC0+FD0+FE0+FF0+FI0
+FT=FA+FB+FC+FD+FE+FF+FI0
+MwA=50; MwB=32; MwI=28 //g/mol
+dp=5.00E-3        //m
+void=0.5
+CatDen=1200     //kg/m3
+BedDen=(1-void)*CatDen
+
+//3. Ideal Gas and Geometry
+PF=20*100000    //Pa
+TF=60
+T=TF                //C isothermal
+vis=0.03
+cP=3.00E-5        //Pas
+R=8.314            //J/mol/K
+PF*v0=FT0*R*(TF+273)
+Den0=(FA0*MwA+FB0*MwB+FI0*MwI)/(1000*v0)
+v=v0*(FT/FT0)*((T+273)/(TF+273))*(PF/P)
+u=v/Ac
+Den=Den0*(FT0/FT)*((TF+273)/(T+273))*(P/PF)
+//G=Den0*u0
+G=Den0*(v0/Ac)
+
+//4. Volume Change and Velocity
+//v0=10 //m3/s
+u0=15 //m/s
+Ac=v0/u0
+pi=22/7
+D=(4*Ac/pi)^0.5            //bed diameter
+z=W/(BedDen*Ac)        //position at W
+
+//5. Rate Laws    (rs = r', per kg of catalyst)
+CA=FA/v; CB=FB/v; CC=FC/v; CD=FD/v; CE=FE/v; CF=FF/v
+//r1=k1*CA*CB^2-k2*CC*CD^3; r2=k3*CA^2*CC
+rs1=ks1*CA*CB^2-ks2*CC*CD^3; rs2=ks3*CA^2*CC
+ks1=10
+ks2=5
+ks3=2
+
+//6. Ergun Pressure Drop    (the seventh state)
+P'=-(f*G^2/(BedDen*dp))/(BedDen*Ac);    P#PF
+f=((1-void)/void^3)*(1.75+((150*(1-void))/Re))
+Re=G*dp/vis
+
+//7. Conversion and Concentration
+XA1=(1/2)*(FB0-FB)/FA0
+XA2=2*(FE-FE0)/FA0
+XA=XA1+XA2
+SC=(FC-FC0)/MAX(FA0-FA,1E-12)
+YC=(FC-FC0)/FA0
+Pbar=P/100000        //bar for plot
+
+//8. Integration and Reporting
+INTEGRAL W[0,50] step 0.1 by RKV
+trend z,CA,CB,CC,CD,CE,CF,XA1,XA2,XA,P,u step 1
+OUTPUT Ac,D,CatDen,BedDen,Den0,G,Re,f,FT0,FI0,W,z,CA,CB,CC,CD,CE,CF,XA1,XA2,XA,SC,YC,Pbar,u,v,Den,FA,FB,FC,FE,FF

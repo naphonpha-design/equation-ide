@@ -1,0 +1,64 @@
+//Lec6 CSTR
+
+// A + 2B <--> C + 3D    r1
+// 2A + C ---> E + F    r2
+
+    //Parameter//
+FA0=3                    //mol/s
+FB0=10                    //mol/s
+FC0=0; FD0=0; FE0=0; FF0=0
+v0=10                    //m3/s
+V=10                        //m3 working volume
+R=8.314                    //J/mol K
+
+    //at 40C// ค่าในสภาวะจริงที่เรากำลังทำปฏิกิริยา
+k10=10; k20=10; k30=5
+TF=40                //C
+k1=k10*exp((E1/R)*((1/(TF+273))-(1/(T+273))))
+k2=k20*exp((E2/R)*((1/(TF+273))-(1/(T+273))))
+k3=k30*exp((E3/R)*((1/(TF+273))-(1/(T+273))))
+E1=35000; E2=45000; E3=30000        //J/mol
+
+//at Tref=TR=25C
+TR=25                        //C ค่ามาตรฐาน
+HRX01=-10000                //J/mol A
+HRX02=-20000                //J/mol C
+HRX1=HRX01+DCP1*(T-TR)
+HRX2=HRX02+DCP2*(T-TR)
+
+CPA=8; CPB=5; CPC=13; CPD=18; CPE=3; CPF=7        //J/molK
+DCP1=3*CPD+CPC-2*CPB-CPA
+DCP2=CPF+CPE-CPC-2*CPA
+
+    //Impleller//
+Np=1.27
+N=1.67                    //rps
+D=0.8                    //m
+Den=1000                //kg/m3
+Wstirr=Np*Den*N^3*D^5
+
+//Adiabatic
+Q=0
+ebal: Q+Wstirr-r1*V*HRX1-r2*V*HRX2=SFCp0*(T-TF)
+
+//CASE I: Adiabatic
+r1=k1*CA*CB^2-k2*CC*CD^3
+r2=k3*CA^2*CC
+
+FA=FA0+(-r1-2*r2)*V
+FB=FB0+(-2*r1)*V
+FC=FC0+(r1-r2)*V
+FD=FD0+3*r1*V
+FE=FE0+r2*V
+FF=FF0+r2*V
+
+CA=FA/v0; CB=FB/v0; CC=FC/v0; CD=FD/v0; CE=FE/v0; CF=FF/v0
+SFCp0=FA0*CPA+FB0*CPB+FC0*CPC+FD0*CPD+FE0*CPE+FF0*CPF    //เป็นพจน์ปรับแก่หน่วยของ Energy balance จาก W/m3 to K/m3
+
+//Result
+XA=(FA0-FA)/FA0
+SCA=(FC-FC0)/(FA0-FA)        //A 1 mol create C 1 mol
+RESET T # 150 [40,400] BY ebal        //สมการนี้ไม่ยอมให้ใช้เคลวินเลย พจน์อื่นชั้นเลยต้องบวก273 อยู่อย่างงงง
+r1 # 0.15
+r2 # 0.03
+OUTPUT T,XA,SCA,Wstirr,r1,r2,FA,FB,FC,FE,FF,FD,HRX1,HRX2
