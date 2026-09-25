@@ -137,6 +137,26 @@ const THAI: Record<DiagnosticCode, Template> = {
     message: `อาจเกิดการหารด้วยศูนย์ที่ '${a.name}'`,
     fix: "ป้องกันด้วย MAX(ตัวส่วน,1E-12)",
   }),
+  E300: (a) => ({
+    message: `ระบบขาดสมการ ${a.count} สมการ — ไม่มีอะไรกำหนดค่าให้: ${a.names}`,
+    fix: "เพิ่มสมการให้ตัวแปรเหล่านี้ หรือกำหนดค่าคงที่ให้ตรง ๆ",
+  }),
+  E301: (a) => ({
+    message: `สมการนี้เกินมา — ระบบมีสมการมากกว่าตัวแปรที่ยังไม่รู้ค่าอยู่ ${a.count} สมการ`,
+    fix: "ลบหรือคอมเมนต์สมการที่ซ้ำซ้อนออก",
+  }),
+  E302: (a) => ({
+    message: `ตัวแปร ${a.names} อ้างวนกันเป็นวง แต่ไม่มีตัวไหนใส่ค่าเริ่มต้น`,
+    fix: `ใส่ค่าเดาให้ตัวใดตัวหนึ่ง เช่น ${a.first} # 0.1`,
+  }),
+  E303: (a) => ({
+    message: `'${a.name}' มีสมการอนุพันธ์ แต่ไม่ได้กำหนดค่าเริ่มต้น`,
+    fix: `เพิ่ม ${a.name}#ค่าเริ่มต้น`,
+  }),
+  E304: (a) => ({
+    message: `RESET บอกให้หา '${a.name}' จากสมการ '${a.label}' แต่สมการนั้นไม่มีตัวแปรนี้อยู่`,
+    fix: "เปลี่ยนไปชี้สมการที่มี หรือแก้สมการให้มีตัวแปรนี้",
+  }),
 };
 
 const ENGLISH: Record<DiagnosticCode, Template> = {
@@ -243,6 +263,26 @@ const ENGLISH: Record<DiagnosticCode, Template> = {
   E212: (a) => ({
     message: `Possible division by zero at '${a.name}'`,
     fix: "Guard it with MAX(denominator,1E-12)",
+  }),
+  E300: (a) => ({
+    message: `The system is ${a.count} equation(s) short — nothing determines: ${a.names}`,
+    fix: "Add an equation for each, or give them a constant value",
+  }),
+  E301: (a) => ({
+    message: `This equation is surplus — the model has ${a.count} more equation(s) than unknowns`,
+    fix: "Remove or comment out the redundant equation",
+  }),
+  E302: (a) => ({
+    message: `${a.names} depend on each other in a circle with no starting value`,
+    fix: `Give one of them a guess, such as ${a.first} # 0.1`,
+  }),
+  E303: (a) => ({
+    message: `'${a.name}' has a derivative equation but no initial value`,
+    fix: `Add ${a.name}#initialValue`,
+  }),
+  E304: (a) => ({
+    message: `RESET solves '${a.name}' with equation '${a.label}', but that equation does not contain it`,
+    fix: "Point at an equation that does, or add the variable to it",
   }),
 };
 

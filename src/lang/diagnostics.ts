@@ -39,7 +39,13 @@ export type DiagnosticCode =
   | "E209" // more than one INTEGRAL statement
   | "E210" // '#' given for a variable nothing else mentions
   | "E211" // self-referential definition, e.g. `x = x + 1`
-  | "E212"; // division by a quantity that is known to be zero
+  | "E212" // division by a quantity that is known to be zero
+  // L4 — structural
+  | "E300" // unknowns with no equation left to determine them
+  | "E301" // an equation with no unknown left to determine
+  | "E302" // a circular group with nothing to break it
+  | "E303" // a state with no initial condition
+  | "E304"; // RESET names an equation that does not contain the variable
 
 export interface Diagnostic {
   severity: Severity;

@@ -71,9 +71,9 @@ output      := 'OUTPUT' identList
 ## Milestones
 
 - **M1** — Lexer, parser, AST, validation L1–L3, Monaco highlighting, inline
-  markers, Problems panel.
-- **M2** — Validation L4: dependency graph, equation/variable balance, variable
-  map panel.
+  markers, Problems panel. *Done.*
+- **M2** — Validation L4: equation-to-unknown matching, balance, circular
+  groups, variable map panel. *Done.*
 - **M3** — Algebraic solver. `samples/lec6-cstr.eqs` runs. Output tab, console,
   residuals.
 - **M4** — DAE integrator, `INTEGRAL` and `trend`.

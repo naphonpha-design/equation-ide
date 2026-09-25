@@ -1,3 +1,4 @@
+import type { VariableRole } from "../lang/analyze";
 import type { Locale } from "./messages";
 
 export interface UiStrings {
@@ -25,7 +26,20 @@ export interface UiStrings {
   lossyEncodingWarning: string;
   statusLine: (line: number, column: number) => string;
   variables: string;
-  variablesComingSoon: string;
+  variablesUnavailable: string;
+  balance: (unknowns: number, equations: number) => string;
+  balanceHint: string;
+  loops: (count: number) => string;
+  loopLabel: string;
+  filterVariables: string;
+  columnName: string;
+  columnRole: string;
+  columnDefined: string;
+  columnGuess: string;
+  columnUses: string;
+  role: (role: VariableRole) => string;
+  roleIndependent: string;
+  roleState: string;
 }
 
 const TH: UiStrings = {
@@ -54,7 +68,27 @@ const TH: UiStrings = {
     "ไฟล์มีตัวอักษรที่ TIS-620 เก็บไม่ได้ จะถูกแทนด้วย ? — เลือก UTF-8 แทนถ้าไม่ต้องการ",
   statusLine: (line, column) => `บรรทัด ${line} คอลัมน์ ${column}`,
   variables: "ตัวแปร",
-  variablesComingSoon: "แผนผังตัวแปรจะมาใน M2",
+  variablesUnavailable: "แก้ข้อผิดพลาดด้านบนก่อน แล้วแผนผังตัวแปรจะแสดงขึ้นมา",
+  balance: (unknowns, equations) =>
+    `${unknowns} ตัวแปร / ${equations} สมการ`,
+  balanceHint: "ระบบจะแก้ได้ต่อเมื่อจำนวนสมการเท่ากับจำนวนตัวแปรที่ยังไม่รู้ค่า",
+  loops: (count) => `วงวน ${count} วง`,
+  loopLabel: "วงวน",
+  filterVariables: "กรองชื่อ",
+  columnName: "ชื่อ",
+  columnRole: "ชนิด",
+  columnDefined: "บรรทัด",
+  columnGuess: "ค่าเดา",
+  columnUses: "ถูกใช้",
+  role: (role) =>
+    ({
+      independent: "ตัวแปรอิสระ",
+      state: "state",
+      algebraic: "พีชคณิต",
+      unknown: "ไม่ทราบ",
+    })[role],
+  roleIndependent: "ตัวแปรอิสระ",
+  roleState: "state",
 };
 
 const EN: UiStrings = {
@@ -83,7 +117,27 @@ const EN: UiStrings = {
     "This file has characters TIS-620 cannot store; they will be replaced with ?. Choose UTF-8 to keep them.",
   statusLine: (line, column) => `Line ${line}, column ${column}`,
   variables: "Variables",
-  variablesComingSoon: "The variable map arrives in M2",
+  variablesUnavailable: "Fix the errors above and the variable map will appear",
+  balance: (unknowns, equations) => `${unknowns} unknowns / ${equations} equations`,
+  balanceHint:
+    "The system is solvable only when there are as many equations as unknowns",
+  loops: (count) => `${count} circular group${count === 1 ? "" : "s"}`,
+  loopLabel: "Loop",
+  filterVariables: "Filter names",
+  columnName: "Name",
+  columnRole: "Kind",
+  columnDefined: "Line",
+  columnGuess: "Guess",
+  columnUses: "Uses",
+  role: (role) =>
+    ({
+      independent: "independent",
+      state: "state",
+      algebraic: "algebraic",
+      unknown: "unknown",
+    })[role],
+  roleIndependent: "Independent",
+  roleState: "States",
 };
 
 export const UI: Record<Locale, UiStrings> = { th: TH, en: EN };

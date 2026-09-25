@@ -63,7 +63,7 @@ describe("semantic analysis", () => {
   });
 
   it("accepts BY pointing at a real label", () => {
-    const source = "Q=0\nT=1\nebal: Q+T=2\nRESET T # 150 [40,400] BY ebal\nOUTPUT T";
+    const source = "Q=0\nebal: Q+T=2\nRESET T # 150 [40,400] BY ebal\nOUTPUT T";
     expect(errors(source)).toEqual([]);
   });
 

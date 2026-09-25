@@ -5,7 +5,7 @@ reports a syntax error without saying where it is or what to do about it.
 
 Everything runs in the browser. There is no server and no login.
 
-## Status — milestone M1
+## Status — milestone M2
 
 | | |
 |---|---|
@@ -13,7 +13,8 @@ Everything runs in the browser. There is no server and no login.
 | ✅ | Validation L1 lexical, L2 syntax, L3 semantic — errors and warnings, each with a location, a reason and a suggested fix |
 | ✅ | Monaco editor with EQUATRAN syntax colouring, inline squiggles and a Problems panel that jumps to the line |
 | ✅ | File list in localStorage, sample models, open and save with UTF-8 or TIS-620, Thai and English messages, light and dark themes |
-| ⏳ | M2 — structural validation (L4): dependency graph, equation and variable balance, variable map panel |
+| ✅ | Validation L4 structural — bipartite matching of equations to unknowns, so a missing or surplus equation is named rather than counted; states without an initial value; circular groups with nothing to break them |
+| ✅ | Variable map panel: equation and unknown balance, each variable's kind, where it is defined, whether it carries a guess, and how often it is used |
 | ⏳ | M3 — algebraic solver, so `samples/lec6-cstr.eqs` runs |
 | ⏳ | M4 — DAE integrator for `INTEGRAL` and `trend`, so `samples/fixed-bed-isothermal.eqs` runs, with charts and CSV export |
 
@@ -24,7 +25,7 @@ The Run button is present but reports that solving arrives in M3.
 ```sh
 npm install
 npm run dev        # development server
-npm test           # 52 tests
+npm test           # 69 tests
 npm run build      # static site in dist/
 ```
 
@@ -35,7 +36,7 @@ so it loads after first paint.
 ## Layout
 
 ```
-src/lang/        lexer, parser, AST, semantic analysis, Monaco language
+src/lang/        lexer, parser, AST, semantic and structural analysis, Monaco language
 src/i18n/        Thai and English text for diagnostics and the interface
 src/encoding/    TIS-620 detection and conversion
 src/storage/     localStorage workspace

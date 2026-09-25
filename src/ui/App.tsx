@@ -19,6 +19,7 @@ import {
 } from "../storage/files";
 import { SAMPLES } from "../samples";
 import { EditorPane } from "./EditorPane";
+import { VariablesPanel } from "./VariablesPanel";
 import { ProblemsPanel } from "./ProblemsPanel";
 import { Sidebar } from "./Sidebar";
 import { Toolbar } from "./Toolbar";
@@ -57,6 +58,7 @@ export function App() {
     readSetting<Theme>(THEME_KEY, "dark"),
   );
   const [cursor, setCursor] = useState({ line: 1, column: 1 });
+  const [panelTab, setPanelTab] = useState<"problems" | "variables">("problems");
   const [notice, setNotice] = useState<string | undefined>();
 
   const revealRef = useRef<((line: number, column: number) => void) | undefined>(
@@ -90,7 +92,10 @@ export function App() {
   }, [notice]);
 
   const source = activeFile?.source ?? "";
-  const { diagnostics } = useMemo(() => validate(source), [source]);
+  const { diagnostics, symbols, structure } = useMemo(
+    () => validate(source),
+    [source],
+  );
   const errorCount = diagnostics.filter((d) => d.severity === "error").length;
   const warningCount = diagnostics.length - errorCount;
 
@@ -265,20 +270,42 @@ export function App() {
 
           <section className="panel">
             <div className="panel__tabs">
-              <span className="panel__tab panel__tab--active">
+              <button
+                type="button"
+                className={`panel__tab${
+                  panelTab === "problems" ? " panel__tab--active" : ""
+                }`}
+                onClick={() => setPanelTab("problems")}
+              >
                 {strings.problems}
                 {diagnostics.length > 0 ? ` (${diagnostics.length})` : ""}
-              </span>
-              <span className="panel__tab panel__tab--disabled">
-                {strings.variables} · {strings.variablesComingSoon}
-              </span>
+              </button>
+              <button
+                type="button"
+                className={`panel__tab${
+                  panelTab === "variables" ? " panel__tab--active" : ""
+                }`}
+                onClick={() => setPanelTab("variables")}
+              >
+                {strings.variables}
+                {structure ? ` (${structure.unknowns.length})` : ""}
+              </button>
             </div>
             <div className="panel__body">
-              <ProblemsPanel
-                diagnostics={diagnostics}
-                locale={locale}
-                onSelect={handleReveal}
-              />
+              {panelTab === "problems" ? (
+                <ProblemsPanel
+                  diagnostics={diagnostics}
+                  locale={locale}
+                  onSelect={handleReveal}
+                />
+              ) : (
+                <VariablesPanel
+                  symbols={symbols}
+                  structure={structure}
+                  locale={locale}
+                  onSelect={handleReveal}
+                />
+              )}
             </div>
           </section>
         </main>
