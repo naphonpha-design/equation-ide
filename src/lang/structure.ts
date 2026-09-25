@@ -244,16 +244,19 @@ function matchEquations(
 }
 
 /**
- * Groups of unknowns that depend on each other in a circle, found as strongly
- * connected components of the graph "u must be known before v" implied by the
- * matching. Tarjan's algorithm, written iteratively so a deep model cannot
- * overflow the stack.
+ * Condenses the dependency graph implied by the matching into strongly
+ * connected components, returned in the order they must be solved: a
+ * component appears after everything it needs.
+ *
+ * Tarjan's algorithm, written iteratively so a deep model cannot overflow the
+ * stack. Tarjan emits components in reverse topological order, so the result
+ * is reversed before being returned.
  */
-function findLoops(
+export function condense(
   unknowns: readonly string[],
   equations: readonly EquationSlot[],
   matching: ReadonlyMap<string, number>,
-): string[][] {
+): { components: string[][]; isLoop: boolean[] } {
   const successors = new Map<string, string[]>();
   for (const name of unknowns) successors.set(name, []);
   for (const [name, index] of matching) {
@@ -268,6 +271,7 @@ function findLoops(
   const onStack = new Set<string>();
   const stack: string[] = [];
   const components: string[][] = [];
+  const isLoop: boolean[] = [];
   let counter = 0;
 
   for (const root of unknowns) {
@@ -311,13 +315,28 @@ function findLoops(
           component.push(member);
           if (member === frame.node) break;
         }
+        component.reverse();
         const selfLoop =
           component.length === 1 &&
           (successors.get(component[0]!) ?? []).includes(component[0]!);
-        if (component.length > 1 || selfLoop) components.push(component.reverse());
+        components.push(component);
+        isLoop.push(component.length > 1 || selfLoop);
       }
     }
   }
 
-  return components;
+  components.reverse();
+  isLoop.reverse();
+  return { components, isLoop };
+}
+
+/** The circular groups among the components: those a solver must handle
+ *  together rather than one variable at a time. */
+function findLoops(
+  unknowns: readonly string[],
+  equations: readonly EquationSlot[],
+  matching: ReadonlyMap<string, number>,
+): string[][] {
+  const { components, isLoop } = condense(unknowns, equations, matching);
+  return components.filter((_, index) => isLoop[index]);
 }

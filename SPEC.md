@@ -75,7 +75,7 @@ output      := 'OUTPUT' identList
 - **M2** — Validation L4: equation-to-unknown matching, balance, circular
   groups, variable map panel. *Done.*
 - **M3** — Algebraic solver. `samples/lec6-cstr.eqs` runs. Output tab, console,
-  residuals.
+  residuals. *Done.*
 - **M4** — DAE integrator, `INTEGRAL` and `trend`.
   `samples/fixed-bed-isothermal.eqs` runs. Trend and Chart tabs, CSV export.
 

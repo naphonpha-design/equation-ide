@@ -1,4 +1,5 @@
 import type { VariableRole } from "../lang/analyze";
+import type { SolveFailure } from "../solver/solve";
 import type { Locale } from "./messages";
 
 export interface UiStrings {
@@ -18,7 +19,7 @@ export interface UiStrings {
   errors: (count: number) => string;
   warnings: (count: number) => string;
   run: string;
-  runNotReady: string;
+  cannotRunWithErrors: string;
   encoding: string;
   saveAs: string;
   theme: string;
@@ -40,6 +41,17 @@ export interface UiStrings {
   role: (role: VariableRole) => string;
   roleIndependent: string;
   roleState: string;
+  results: string;
+  notRunYet: string;
+  solved: string;
+  solveFailedTitle: string;
+  solveFailure: (failure: SolveFailure) => string;
+  residual: (value: number) => string;
+  residualHint: string;
+  blocksSolved: (total: number, iterated: number) => string;
+  outputTable: string;
+  rawConsole: string;
+  columnValue: string;
 }
 
 const TH: UiStrings = {
@@ -59,7 +71,7 @@ const TH: UiStrings = {
   errors: (count) => `${count} ข้อผิดพลาด`,
   warnings: (count) => `${count} คำเตือน`,
   run: "รัน",
-  runNotReady: "การคำนวณยังไม่พร้อม — จะมาใน M3",
+  cannotRunWithErrors: "แก้ข้อผิดพลาดในแท็บปัญหาก่อน แล้วจึงรันได้",
   encoding: "การเข้ารหัส",
   saveAs: "บันทึกเป็น",
   theme: "ธีม",
@@ -89,6 +101,29 @@ const TH: UiStrings = {
     })[role],
   roleIndependent: "ตัวแปรอิสระ",
   roleState: "state",
+  results: "ผลลัพธ์",
+  notRunYet: "ยังไม่ได้รัน — กด ▶ รัน หรือ Ctrl+Enter",
+  solved: "แก้สำเร็จ",
+  solveFailedTitle: "คำนวณไม่สำเร็จ",
+  solveFailure: (failure) => {
+    switch (failure.kind) {
+      case "unsupported-ode":
+        return "โมเดลนี้มีสมการอนุพันธ์ (INTEGRAL) ซึ่งจะรองรับใน M4 — ตอนนี้รันได้เฉพาะระบบพีชคณิต";
+      case "unbalanced":
+        return "จำนวนสมการกับตัวแปรไม่เท่ากัน ดูรายละเอียดที่แท็บปัญหา";
+      case "block-failed":
+        return `ลู่เข้าไม่ได้ที่ ${failure.variables.join(", ")} — ลองเปลี่ยนค่าเดา (#) ให้ใกล้คำตอบจริงขึ้น`;
+      case "evaluation":
+        return `คำนวณนิพจน์ไม่ได้${failure.variable ? ` ที่ '${failure.variable}'` : ""}: ${failure.message}`;
+    }
+  },
+  residual: (value) => `เศษเหลือสูงสุด ${value.toExponential(2)}`,
+  residualHint: "ค่ายิ่งใกล้ศูนย์ แปลว่าคำตอบยิ่งเข้ากับทุกสมการ",
+  blocksSolved: (total, iterated) =>
+    `${total} บล็อก (วนซ้ำ ${iterated})`,
+  outputTable: "ตาราง",
+  rawConsole: "ข้อความดิบ",
+  columnValue: "ค่า",
 };
 
 const EN: UiStrings = {
@@ -108,7 +143,7 @@ const EN: UiStrings = {
   errors: (count) => `${count} error${count === 1 ? "" : "s"}`,
   warnings: (count) => `${count} warning${count === 1 ? "" : "s"}`,
   run: "Run",
-  runNotReady: "Solving is not wired up yet — it arrives in M3",
+  cannotRunWithErrors: "Fix the errors in the Problems tab first",
   encoding: "Encoding",
   saveAs: "Save as",
   theme: "Theme",
@@ -138,6 +173,28 @@ const EN: UiStrings = {
     })[role],
   roleIndependent: "Independent",
   roleState: "States",
+  results: "Results",
+  notRunYet: "Not run yet — press ▶ Run, or Ctrl+Enter",
+  solved: "Solved",
+  solveFailedTitle: "Could not solve",
+  solveFailure: (failure) => {
+    switch (failure.kind) {
+      case "unsupported-ode":
+        return "This model has derivative equations (INTEGRAL), which arrive in M4. Algebraic systems run today.";
+      case "unbalanced":
+        return "There are not as many equations as unknowns; see the Problems tab";
+      case "block-failed":
+        return `Did not converge on ${failure.variables.join(", ")} — try a starting guess (#) closer to the answer`;
+      case "evaluation":
+        return `Could not evaluate an expression${failure.variable ? ` at '${failure.variable}'` : ""}: ${failure.message}`;
+    }
+  },
+  residual: (value) => `Largest residual ${value.toExponential(2)}`,
+  residualHint: "The closer to zero, the better the answer satisfies every equation",
+  blocksSolved: (total, iterated) => `${total} blocks (${iterated} iterated)`,
+  outputTable: "Table",
+  rawConsole: "Raw text",
+  columnValue: "Value",
 };
 
 export const UI: Record<Locale, UiStrings> = { th: TH, en: EN };

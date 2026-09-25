@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { validate } from "../lang";
+import { solveModel, type SolveResult } from "../solver/solve";
 import type { Locale } from "../i18n/messages";
 import { UI } from "../i18n/ui";
 import {
@@ -19,6 +20,7 @@ import {
 } from "../storage/files";
 import { SAMPLES } from "../samples";
 import { EditorPane } from "./EditorPane";
+import { ResultsPanel } from "./ResultsPanel";
 import { VariablesPanel } from "./VariablesPanel";
 import { ProblemsPanel } from "./ProblemsPanel";
 import { Sidebar } from "./Sidebar";
@@ -58,7 +60,10 @@ export function App() {
     readSetting<Theme>(THEME_KEY, "dark"),
   );
   const [cursor, setCursor] = useState({ line: 1, column: 1 });
-  const [panelTab, setPanelTab] = useState<"problems" | "variables">("problems");
+  const [panelTab, setPanelTab] = useState<
+    "problems" | "variables" | "results"
+  >("problems");
+  const [solution, setSolution] = useState<SolveResult | undefined>();
   const [notice, setNotice] = useState<string | undefined>();
 
   const revealRef = useRef<((line: number, column: number) => void) | undefined>(
@@ -92,7 +97,7 @@ export function App() {
   }, [notice]);
 
   const source = activeFile?.source ?? "";
-  const { diagnostics, symbols, structure } = useMemo(
+  const { program, diagnostics, symbols, structure } = useMemo(
     () => validate(source),
     [source],
   );
@@ -207,8 +212,17 @@ export function App() {
   }, []);
 
   const handleRun = useCallback(() => {
-    setNotice(strings.runNotReady);
-  }, [strings.runNotReady]);
+    setPanelTab("results");
+    if (!structure) {
+      setSolution(undefined);
+      setNotice(strings.cannotRunWithErrors);
+      return;
+    }
+    setSolution(solveModel(program, symbols, structure));
+  }, [program, structure, symbols, strings.cannotRunWithErrors]);
+
+  // A solved model describes the source it came from, so editing invalidates it.
+  useEffect(() => setSolution(undefined), [source]);
 
   const handleReveal = useCallback((line: number, column: number) => {
     revealRef.current?.(line, column);
@@ -290,6 +304,16 @@ export function App() {
                 {strings.variables}
                 {structure ? ` (${structure.unknowns.length})` : ""}
               </button>
+              <button
+                type="button"
+                className={`panel__tab${
+                  panelTab === "results" ? " panel__tab--active" : ""
+                }`}
+                onClick={() => setPanelTab("results")}
+              >
+                {strings.results}
+                {solution?.converged ? " ✓" : ""}
+              </button>
             </div>
             <div className="panel__body">
               {panelTab === "problems" ? (
@@ -298,13 +322,15 @@ export function App() {
                   locale={locale}
                   onSelect={handleReveal}
                 />
-              ) : (
+              ) : panelTab === "variables" ? (
                 <VariablesPanel
                   symbols={symbols}
                   structure={structure}
                   locale={locale}
                   onSelect={handleReveal}
                 />
+              ) : (
+                <ResultsPanel result={solution} locale={locale} />
               )}
             </div>
           </section>

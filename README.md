@@ -5,7 +5,7 @@ reports a syntax error without saying where it is or what to do about it.
 
 Everything runs in the browser. There is no server and no login.
 
-## Status — milestone M2
+## Status — milestone M3
 
 | | |
 |---|---|
@@ -15,17 +15,19 @@ Everything runs in the browser. There is no server and no login.
 | ✅ | File list in localStorage, sample models, open and save with UTF-8 or TIS-620, Thai and English messages, light and dark themes |
 | ✅ | Validation L4 structural — bipartite matching of equations to unknowns, so a missing or surplus equation is named rather than counted; states without an initial value; circular groups with nothing to break them |
 | ✅ | Variable map panel: equation and unknown balance, each variable's kind, where it is defined, whether it carries a guess, and how often it is used |
-| ⏳ | M3 — algebraic solver, so `samples/lec6-cstr.eqs` runs |
+| ✅ | Algebraic solver: block decomposition, tearing at `#` guesses, damped Newton with `RESET` bounds. `samples/lec6-cstr.eqs` runs to a largest residual of 4e-12 |
+| ✅ | Results tab with the `OUTPUT` table, a raw text view, and the residual as a trustworthiness signal |
 | ⏳ | M4 — DAE integrator for `INTEGRAL` and `trend`, so `samples/fixed-bed-isothermal.eqs` runs, with charts and CSV export |
 
-The Run button is present but reports that solving arrives in M3.
+Run solves algebraic models. A model with `INTEGRAL` says plainly that
+integration arrives in M4 rather than failing obscurely.
 
 ## Running it
 
 ```sh
 npm install
 npm run dev        # development server
-npm test           # 69 tests
+npm test           # 89 tests
 npm run build      # static site in dist/
 ```
 
@@ -40,6 +42,7 @@ src/lang/        lexer, parser, AST, semantic and structural analysis, Monaco la
 src/i18n/        Thai and English text for diagnostics and the interface
 src/encoding/    TIS-620 detection and conversion
 src/storage/     localStorage workspace
+src/solver/      expression evaluation, Newton-Raphson, block solving
 src/ui/          React components
 samples/         the two reference models this dialect was derived from
 tests/           unit tests, plus a guard that both samples stay error-free
